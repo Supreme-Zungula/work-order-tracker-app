@@ -22,6 +22,12 @@ const router = createRouter({
       name: 'activities',
       component: () => import('../views/ActivitiesView.vue'),
     },
+    {
+      path: '/work-orders/:id/activities',
+      name: 'workOrderActivities',
+      component: () => import('../views/WorkOrderActivitiesView.vue'),
+      props: true,
+    },
   ],
 })
 

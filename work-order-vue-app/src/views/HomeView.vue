@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { VDataTable, VMenu } from 'vuetify/components'
+import { useRouter } from 'vue-router'
 import { workOrderService } from '@/services/api'
 import type { WorkOrder, WorkOrderStatus } from '@/types/work-order'
 import WorkOrderModal from '@/components/work-orders/WorkOrderModal.vue'
+
+const router = useRouter()
 
 const workOrders = ref<WorkOrder[]>([])
 const loading = ref(false)
@@ -68,9 +71,7 @@ function handleUpdateOrder(workOrder: WorkOrder) {
 }
 
 function handleViewActivities(workOrder: WorkOrder) {
-  // Navigate to activities view with work order filter
-  // For now, just log - can be implemented with router
-  console.log('View activities for:', workOrder.id)
+  router.push({ name: 'workOrderActivities', params: { id: workOrder.id.toString() } })
 }
 
 async function handleDeleteOrder(workOrder: WorkOrder) {
