@@ -1,3 +1,55 @@
+<template>
+  <v-container fluid class="pa-4">
+    <v-card>
+      <v-card-title class="d-flex align-center justify-space-between">
+        <span class="text-h5">All Activities</span>
+        <v-btn color="primary" @click="fetchActivities" :disabled="loading">
+          <v-icon start>mdi-refresh</v-icon>
+          Refresh
+        </v-btn>
+      </v-card-title>
+
+      <v-data-table
+        :headers="headers"
+        :items="activities"
+        :loading="loading"
+        :items-per-page="pageSize"
+        :server-items-length="totalItems"
+        :current-page="currentPage"
+        @update:current-page="onPageChange"
+        :disable-sort="true"
+        density="compact"
+        hover
+      >
+        <template #[`item.workOrderId`]="{ item }">
+          <span class="font-monospace">#{{ item.workOrderId }}</span>
+        </template>
+
+        <template #[`item.details`]="{ item }">
+          <span v-if="item.details">{{ item.details }}</span>
+          <span v-else class="text-gray-400">-</span>
+        </template>
+
+        <template #[`item.timestamp`]="{ item }">
+          {{ formatDate(item.timestamp) }}
+        </template>
+
+        <template #no-data>
+          <v-alert type="info" variant="tonal" class="ma-4"> No activities found </v-alert>
+        </template>
+      </v-data-table>
+
+      <v-card-actions class="pa-4">
+        <v-pagination
+          v-model="currentPage"
+          :length="Math.ceil(totalItems / pageSize)"
+          @update:model-value="onPageChange"
+        />
+      </v-card-actions>
+    </v-card>
+  </v-container>
+</template>
+
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { VDataTable } from 'vuetify/components'
@@ -51,59 +103,4 @@ onMounted(() => {
 })
 </script>
 
-<template>
-  <v-container fluid class="pa-4">
-    <v-card>
-      <v-card-title class="d-flex align-center justify-space-between">
-        <span class="text-h5">All Activities</span>
-        <v-btn color="primary" @click="fetchActivities" :disabled="loading">
-          <v-icon start>mdi-refresh</v-icon>
-          Refresh
-        </v-btn>
-      </v-card-title>
-
-      <v-data-table
-        :headers="headers"
-        :items="activities"
-        :loading="loading"
-        :items-per-page="pageSize"
-        :server-items-length="totalItems"
-        :current-page="currentPage"
-        @update:current-page="onPageChange"
-        :disable-sort="true"
-        density="compact"
-        hover
-      >
-        <template #[`item.workOrderId`]="{ item }">
-          <span class="font-monospace">#{{ item.workOrderId }}</span>
-        </template>
-
-        <template #[`item.details`]="{ item }">
-          <span v-if="item.details">{{ item.details }}</span>
-          <span v-else class="text-gray-400">-</span>
-        </template>
-
-        <template #[`item.timestamp`]="{ item }">
-          {{ formatDate(item.timestamp) }}
-        </template>
-
-        <template #no-data>
-          <v-alert type="info" variant="tonal" class="ma-4">
-            No activities found
-          </v-alert>
-        </template>
-      </v-data-table>
-
-      <v-card-actions class="pa-4">
-        <v-pagination
-          v-model="currentPage"
-          :length="Math.ceil(totalItems / pageSize)"
-          @update:model-value="onPageChange"
-        />
-      </v-card-actions>
-    </v-card>
-  </v-container>
-</template>
-
-<style scoped>
-</style>
+<style scoped></style>
