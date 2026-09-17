@@ -43,7 +43,7 @@ function formatDate(dateString: string): string {
 async function fetchWorkOrder() {
   const id = Number(route.params.id)
   if (!id) return
-  
+
   loading.value = true
   try {
     workOrder.value = await workOrderService.getWorkOrder(id)
@@ -57,7 +57,7 @@ async function fetchWorkOrder() {
 async function fetchActivities() {
   const id = Number(route.params.id)
   if (!id) return
-  
+
   activityLoading.value = true
   try {
     const response = await activityService.getActivities(currentPage.value, pageSize, id)
@@ -79,11 +79,15 @@ function goBack() {
   router.push({ name: 'home' })
 }
 
-watch(() => route.params.id, () => {
-  currentPage.value = 1
-  fetchWorkOrder()
-  fetchActivities()
-}, { immediate: true })
+watch(
+  () => route.params.id,
+  () => {
+    currentPage.value = 1
+    fetchWorkOrder()
+    fetchActivities()
+  },
+  { immediate: true },
+)
 
 onMounted(() => {
   fetchWorkOrder()
@@ -101,18 +105,18 @@ onMounted(() => {
     <v-card v-if="!loading && workOrder" class="mb-4">
       <v-card-title class="pb-2">
         <div class="text-h5">{{ workOrder.title }}</div>
-        <div class="text-body-2 text-gray-500 mt-1">{{ workOrder.description || 'No description' }}</div>
+        <div class="text-body-2 text-gray-500 mt-1">
+          {{ workOrder.description || 'No description' }}
+        </div>
         <div class="d-flex align-center gap-4 mt-2">
-          <v-chip
-            :color="statusColors[workOrder.status]"
-            size="small"
-            variant="tonal"
-          >
+          <v-chip :color="statusColors[workOrder.status]" size="small" variant="tonal">
             {{ workOrder.status }}
           </v-chip>
           <span class="text-caption">Assigned to: {{ workOrder.assignedTo }}</span>
           <span class="text-caption">Created: {{ formatDate(workOrder.createdAt) }}</span>
-          <span v-if="workOrder.dueDate" class="text-caption">Due: {{ formatDate(workOrder.dueDate) }}</span>
+          <span v-if="workOrder.dueDate" class="text-caption"
+            >Due: {{ formatDate(workOrder.dueDate) }}</span
+          >
         </div>
       </v-card-title>
     </v-card>
@@ -168,5 +172,4 @@ onMounted(() => {
   </v-container>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

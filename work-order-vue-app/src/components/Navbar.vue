@@ -22,7 +22,7 @@ const route = useRoute()
               <RouterLink
                 to="/"
                 class="px-3 p-2 rounded-md text-green-500 text-lg font-medium transition-colors hover:bg-indigo-700"
-                :class="{ 'bg-indigo-700': route.name === 'home' }"
+                :class="{ 'bg-indigo-700 font-bold': route.name === 'home' }"
               >
                 Orders
               </RouterLink>
@@ -30,7 +30,7 @@ const route = useRoute()
             <li>
               <RouterLink
                 to="/activities"
-                class="px-3 py-2 rounded-md text-lg font-medium transition-colors hover:bg-indigo-700"
+                class="px-3 py-2 rounded-md text-lg text-green-500 font-medium transition-colors hover:bg-indigo-700"
                 :class="{ 'bg-indigo-700 text-yellow-300': route.name === 'activities' }"
               >
                 Activities
