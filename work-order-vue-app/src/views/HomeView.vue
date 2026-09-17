@@ -3,12 +3,14 @@ import { ref, onMounted } from 'vue'
 import { VDataTable } from 'vuetify/components'
 import { workOrderService } from '@/services/api'
 import type { WorkOrder, WorkOrderStatus } from '@/types/work-order'
+import WorkOrderModal from '@/components/work-orders/WorkOrderModal.vue'
 
 const workOrders = ref<WorkOrder[]>([])
 const loading = ref(false)
 const totalItems = ref(0)
 const currentPage = ref(1)
 const pageSize = 10
+const showModal = ref(false)
 
 const headers = [
   { title: 'ID', key: 'id', sortable: false, width: 60 },
@@ -53,6 +55,11 @@ function onPageChange(page: number) {
   fetchWorkOrders()
 }
 
+function handleWorkOrderCreated(newWorkOrder: WorkOrder) {
+  workOrders.value.unshift(newWorkOrder)
+  totalItems.value += 1
+}
+
 onMounted(() => {
   fetchWorkOrders()
 })
@@ -63,10 +70,16 @@ onMounted(() => {
     <v-card>
       <v-card-title class="d-flex align-center justify-space-between">
         <span class="text-h5">Work Orders</span>
-        <v-btn color="primary" @click="fetchWorkOrders" :disabled="loading">
-          <v-icon start>mdi-refresh</v-icon>
-          Refresh
-        </v-btn>
+        <div class="d-flex gap-2">
+          <v-btn color="primary" @click="showModal = true">
+            <v-icon start>mdi-plus</v-icon>
+            Add Work Order
+          </v-btn>
+          <v-btn color="primary" @click="fetchWorkOrders" :disabled="loading">
+            <v-icon start>mdi-refresh</v-icon>
+            Refresh
+          </v-btn>
+        </div>
       </v-card-title>
 
       <v-data-table
@@ -115,6 +128,11 @@ onMounted(() => {
         />
       </v-card-actions>
     </v-card>
+
+    <WorkOrderModal
+      v-model="showModal"
+      @created="handleWorkOrderCreated"
+    />
   </v-container>
 </template>
 
