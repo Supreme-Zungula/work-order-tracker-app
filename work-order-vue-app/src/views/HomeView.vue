@@ -56,7 +56,7 @@
                 class="text-white hover:text-gray-300"
                 aria-label="More options"
               >
-                <v-icon>mdi-dots-vertical</v-icon>
+                <v-icon class="text-gray-300">mdi-dots-vertical</v-icon>
               </v-btn>
             </template>
             <v-list class="py-2" min-width="180">
