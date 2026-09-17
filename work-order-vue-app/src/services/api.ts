@@ -1,5 +1,11 @@
 import { useApiBaseUrl } from '@/composables/useApiBaseUrl'
-import type { WorkOrder, WorkOrderListResponse, CreateWorkOrderRequest, UpdateWorkOrderStatusRequest, Activity } from '@/types/work-order'
+import type {
+  WorkOrder,
+  WorkOrderListResponse,
+  CreateWorkOrderRequest,
+  UpdateWorkOrderStatusRequest,
+  Activity,
+} from '@/types/work-order'
 
 const { apiBaseUrl } = useApiBaseUrl()
 
@@ -62,7 +68,11 @@ export const workOrderService = {
 }
 
 export const activityService = {
-  async getActivities(page = 1, pageSize = 10, workOrderId?: number): Promise<{ items: Activity[], page: number, pageSize: number, totalCount: number }> {
+  async getActivities(
+    page = 1,
+    pageSize = 10,
+    workOrderId?: number,
+  ): Promise<{ items: Activity[]; page: number; pageSize: number; totalCount: number }> {
     const params = new URLSearchParams({
       page: page.toString(),
       pageSize: pageSize.toString(),
@@ -70,6 +80,8 @@ export const activityService = {
     if (workOrderId) {
       params.append('workOrderId', workOrderId.toString())
     }
-    return fetchApi<{ items: Activity[], page: number, pageSize: number, totalCount: number }>(`/activities?${params.toString()}`)
+    return fetchApi<{ items: Activity[]; page: number; pageSize: number; totalCount: number }>(
+      `/activities?${params.toString()}`,
+    )
   },
 }
