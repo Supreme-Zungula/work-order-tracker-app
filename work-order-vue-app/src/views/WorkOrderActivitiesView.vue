@@ -1,3 +1,95 @@
+<template>
+  <v-container fluid class="pa-4 flex flex-col gap-4">
+    <v-btn
+      variant="outlined"
+      @click="goBack"
+      class="w-40 justify-end self-end text-center mb-4"
+      start
+    >
+      <v-icon>mdi-arrow-left</v-icon>
+      Back to Work Orders
+    </v-btn>
+
+    <v-card v-if="!loading && workOrder" class="mb-4">
+      <v-card-title class="flex flex-col gap-2 pb-2">
+        <div>
+          <div class="text-h5">{{ workOrder.title }}</div>
+          <div class="text-body-2 text-gray-500 mt-1">
+            {{ workOrder.description || 'No description' }}
+          </div>
+        </div>
+
+        <v-chip
+          :color="statusColors[workOrder.status]"
+          size="small"
+          variant="tonal"
+          class="text-center w-40"
+        >
+          {{ workOrder.status }}
+        </v-chip>
+        <div class="d-flex gap-4 mt-2">
+          <div class="flex flex-col gap-1">
+            <span class="text-lg">Assigned to: {{ workOrder.assignedTo }}</span>
+            <span class="text-lg">Created: {{ formatDate(workOrder.createdAt) }}</span>
+            <span v-if="workOrder.dueDate" class="text-lg"
+              >Due: {{ formatDate(workOrder.dueDate) }}</span
+            >
+          </div>
+        </div>
+      </v-card-title>
+    </v-card>
+
+    <v-card v-if="loading" class="mb-4">
+      <v-card-text class="pa-8 text-center">
+        <v-progress-circular indeterminate color="primary" />
+      </v-card-text>
+    </v-card>
+
+    <v-card>
+      <v-card-title class="d-flex align-center justify-space-between">
+        <span class="text-h6">Activities</span>
+        <span class="text-caption text-gray-500">{{ totalItems }} total</span>
+      </v-card-title>
+
+      <v-data-table
+        :headers="headers"
+        :items="activities"
+        :loading="activityLoading"
+        :items-per-page="pageSize"
+        :server-items-length="totalItems"
+        :current-page="currentPage"
+        @update:current-page="onPageChange"
+        :disable-sort="true"
+        density="compact"
+        hover
+      >
+        <template #[`item.timestamp`]="{ item }">
+          {{ formatDate(item.timestamp) }}
+        </template>
+
+        <template #[`item.details`]="{ item }">
+          <span v-if="item.details">{{ item.details }}</span>
+          <span v-else class="text-gray-400">-</span>
+        </template>
+
+        <template #no-data>
+          <v-alert type="info" variant="tonal" class="ma-4">
+            No activities found for this work order
+          </v-alert>
+        </template>
+      </v-data-table>
+
+      <v-card-actions class="pa-4">
+        <v-pagination
+          v-model="currentPage"
+          :length="Math.ceil(totalItems / pageSize)"
+          @update:model-value="onPageChange"
+        />
+      </v-card-actions>
+    </v-card>
+  </v-container>
+</template>
+
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -94,82 +186,5 @@ onMounted(() => {
   fetchActivities()
 })
 </script>
-
-<template>
-  <v-container fluid class="pa-4">
-    <v-btn variant="outlined" @click="goBack" class="mb-4" start>
-      <v-icon>mdi-arrow-left</v-icon>
-      Back to Work Orders
-    </v-btn>
-
-    <v-card v-if="!loading && workOrder" class="mb-4">
-      <v-card-title class="pb-2">
-        <div class="text-h5">{{ workOrder.title }}</div>
-        <div class="text-body-2 text-gray-500 mt-1">
-          {{ workOrder.description || 'No description' }}
-        </div>
-        <div class="d-flex align-center gap-4 mt-2">
-          <v-chip :color="statusColors[workOrder.status]" size="small" variant="tonal">
-            {{ workOrder.status }}
-          </v-chip>
-          <span class="text-caption">Assigned to: {{ workOrder.assignedTo }}</span>
-          <span class="text-caption">Created: {{ formatDate(workOrder.createdAt) }}</span>
-          <span v-if="workOrder.dueDate" class="text-caption"
-            >Due: {{ formatDate(workOrder.dueDate) }}</span
-          >
-        </div>
-      </v-card-title>
-    </v-card>
-
-    <v-card v-if="loading" class="mb-4">
-      <v-card-text class="pa-8 text-center">
-        <v-progress-circular indeterminate color="primary" />
-      </v-card-text>
-    </v-card>
-
-    <v-card>
-      <v-card-title class="d-flex align-center justify-space-between">
-        <span class="text-h6">Activities</span>
-        <span class="text-caption text-gray-500">{{ totalItems }} total</span>
-      </v-card-title>
-
-      <v-data-table
-        :headers="headers"
-        :items="activities"
-        :loading="activityLoading"
-        :items-per-page="pageSize"
-        :server-items-length="totalItems"
-        :current-page="currentPage"
-        @update:current-page="onPageChange"
-        :disable-sort="true"
-        density="compact"
-        hover
-      >
-        <template #[`item.timestamp`]="{ item }">
-          {{ formatDate(item.timestamp) }}
-        </template>
-
-        <template #[`item.details`]="{ item }">
-          <span v-if="item.details">{{ item.details }}</span>
-          <span v-else class="text-gray-400">-</span>
-        </template>
-
-        <template #no-data>
-          <v-alert type="info" variant="tonal" class="ma-4">
-            No activities found for this work order
-          </v-alert>
-        </template>
-      </v-data-table>
-
-      <v-card-actions class="pa-4">
-        <v-pagination
-          v-model="currentPage"
-          :length="Math.ceil(totalItems / pageSize)"
-          @update:model-value="onPageChange"
-        />
-      </v-card-actions>
-    </v-card>
-  </v-container>
-</template>
 
 <style scoped></style>
