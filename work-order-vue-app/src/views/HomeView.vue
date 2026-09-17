@@ -1,14 +1,20 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { VDataTable } from 'vuetify/components'
+import { VDataTable, VMenu } from 'vuetify/components'
+import { useRouter } from 'vue-router'
 import { workOrderService } from '@/services/api'
 import type { WorkOrder, WorkOrderStatus } from '@/types/work-order'
+import WorkOrderModal from '@/components/work-orders/WorkOrderModal.vue'
+
+const router = useRouter()
 
 const workOrders = ref<WorkOrder[]>([])
 const loading = ref(false)
 const totalItems = ref(0)
 const currentPage = ref(1)
 const pageSize = 10
+const showModal = ref(false)
+const selectedWorkOrder = ref<WorkOrder | null>(null)
 
 const headers = [
   { title: 'ID', key: 'id', sortable: false, width: 60 },
@@ -17,6 +23,7 @@ const headers = [
   { title: 'Assigned To', key: 'assignedTo', sortable: false, width: 160 },
   { title: 'Created', key: 'createdAt', sortable: false, width: 160 },
   { title: 'Due Date', key: 'dueDate', sortable: false, width: 160 },
+  { title: 'Actions', key: 'actions', sortable: false, width: 100 },
 ]
 
 const statusColors: Record<WorkOrderStatus, string> = {
@@ -53,6 +60,34 @@ function onPageChange(page: number) {
   fetchWorkOrders()
 }
 
+function handleWorkOrderCreated(newWorkOrder: WorkOrder) {
+  workOrders.value.unshift(newWorkOrder)
+  totalItems.value += 1
+}
+
+function handleUpdateOrder(workOrder: WorkOrder) {
+  selectedWorkOrder.value = workOrder
+  showModal.value = true
+}
+
+function handleViewActivities(workOrder: WorkOrder) {
+  router.push({ name: 'workOrderActivities', params: { id: workOrder.id.toString() } })
+}
+
+async function handleDeleteOrder(workOrder: WorkOrder) {
+  if (!confirm(`Are you sure you want to delete work order "${workOrder.title}"?`)) {
+    return
+  }
+  try {
+    await workOrderService.deleteWorkOrder(workOrder.id)
+    workOrders.value = workOrders.value.filter(wo => wo.id !== workOrder.id)
+    totalItems.value -= 1
+  } catch (error) {
+    console.error('Failed to delete work order:', error)
+    alert('Failed to delete work order')
+  }
+}
+
 onMounted(() => {
   fetchWorkOrders()
 })
@@ -63,10 +98,16 @@ onMounted(() => {
     <v-card>
       <v-card-title class="d-flex align-center justify-space-between">
         <span class="text-h5">Work Orders</span>
-        <v-btn color="primary" @click="fetchWorkOrders" :disabled="loading">
-          <v-icon start>mdi-refresh</v-icon>
-          Refresh
-        </v-btn>
+        <div class="d-flex gap-2">
+          <v-btn color="primary" @click="showModal = true">
+            <v-icon start>mdi-plus</v-icon>
+            Add Work Order
+          </v-btn>
+          <v-btn color="primary" @click="fetchWorkOrders" :disabled="loading">
+            <v-icon start>mdi-refresh</v-icon>
+            Refresh
+          </v-btn>
+        </div>
       </v-card-title>
 
       <v-data-table
@@ -99,6 +140,52 @@ onMounted(() => {
         <template #[`item.dueDate`]="{ item }">
           {{ formatDate(item.dueDate) }}
         </template>
+        <!-- Actions column -->
+      <template #[`item.actions`]="{ item }">
+          <v-menu location="bottom end" offset-y>
+            <template v-slot:activator="{ props }">
+              <v-btn
+                v-bind="props"
+                icon
+                variant="text"
+                class="text-white hover:text-gray-300"
+                aria-label="More options"
+              >
+                <v-icon>mdi-dots-vertical</v-icon>
+              </v-btn>
+            </template>
+            <v-list class="py-2" min-width="180">
+              <v-list-item
+                @click="handleUpdateOrder(item)"
+                class="px-3"
+              >
+                <v-list-item-title class="text-sm">
+                  <v-icon start class="mr-2" size="18">mdi-pencil</v-icon>
+                  Update Order
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item
+                @click="handleViewActivities(item)"
+                class="px-3"
+              >
+                <v-list-item-title class="text-sm">
+                  <v-icon start class="mr-2" size="18">mdi-clock-outline</v-icon>
+                  View Activities
+                </v-list-item-title>
+              </v-list-item>
+              <v-divider class="my-2" />
+              <v-list-item
+                @click="handleDeleteOrder(item)"
+                class="px-3 text-error"
+              >
+                <v-list-item-title class="text-sm">
+                  <v-icon start class="mr-2" size="18">mdi-delete</v-icon>
+                  Delete
+                </v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </template>
 
         <template #no-data>
           <v-alert type="info" variant="tonal" class="ma-4">
@@ -115,6 +202,11 @@ onMounted(() => {
         />
       </v-card-actions>
     </v-card>
+
+    <WorkOrderModal
+      v-model="showModal"
+      @created="handleWorkOrderCreated"
+    />
   </v-container>
 </template>
 
